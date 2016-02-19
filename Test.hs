@@ -135,6 +135,15 @@ tests = testGroup "unit tests"
     , testProperty "build sorted"
     (\msgList -> isSorted (inOrder (build msgList)))
 
+    , testProperty "checkStamp"
+    (checkReadStamp)
+
+    , testProperty "checkMessage"
+    (testUndoMessage)
+
+    , testProperty "ParseMessage"
+    (checkTestParse)
+
     -- show :: Int -> String
     -- gives the String representation of an Int
     -- Use show to test your code to parse Ints
@@ -149,5 +158,31 @@ tests = testGroup "unit tests"
     -- Use it to test parseMessage
 
   ]
+ridString :: (TimeStamp, String) -> TimeStamp
+ridString (t, s) = t
+
+
+checkReadStamp :: Int -> Bool
+checkReadStamp d = d == ridString(readTimeStamp ((show d) : ["calfsjc"]))
+
+undoMessage :: MessageType -> Char
+undoMessage (Error x) = 'E'
+undoMessage x = if x ==  Info then 'I'
+                    else if x ==  Warning then 'W'
+                    else ' '
+
+testUndoMessage :: MessageType -> Bool
+testUndoMessage (Error x) = Just (Error 0) == checkMessageType(undoMessage(Error x))
+testUndoMessage x = Just x ==  checkMessageType(undoMessage(x))
+
+ifErrorChange :: MessageType -> String
+ifErrorChange (Error x) = "Error " ++ show(x)
+ifErrorChange x = (undoMessage x): ""
+
+testTheParse :: LogMessage -> String
+testTheParse (LogMessage m t s) = (ifErrorChange m) ++ " " ++ show(t) ++ " " ++ s
+
+checkTestParse :: LogMessage -> Bool
+checkTestParse x = x == parseMessage(testTheParse x)
 
 main = defaultMain tests
