@@ -176,13 +176,13 @@ testUndoMessage (Error x) = Just (Error 0) == checkMessageType(undoMessage(Error
 testUndoMessage x = Just x ==  checkMessageType(undoMessage(x))
 
 ifErrorChange :: MessageType -> String
-ifErrorChange (Error x) = "Error " ++ show(x)
+ifErrorChange (Error x) = "E " ++ show(x)
 ifErrorChange x = (undoMessage x): ""
 
 testTheParse :: LogMessage -> String
 testTheParse (LogMessage m t s) = (ifErrorChange m) ++ " " ++ show(t) ++ " " ++ s
 
 checkTestParse :: LogMessage -> Bool
-checkTestParse x = x == parseMessage(testTheParse x)
+checkTestParse x@(LogMessage m t s) = (LogMessage m t (unwords(words s))) == parseMessage(testTheParse x)
 
 main = defaultMain tests
